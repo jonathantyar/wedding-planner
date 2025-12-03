@@ -41,16 +41,21 @@ export interface Guest {
 }
 
 export interface Store {
-    plans: WeddingPlan[];
     currentPlan: WeddingPlan | null;
     lastSynced: number | null;
     guests: Guest[];
+    isLoading: boolean;
 
     // Plan actions
     createPlan: (name: string, passcode: string) => Promise<void>;
     login: (name: string, passcode: string) => Promise<boolean>;
     logout: () => void;
     loadPlanById: (planId: string, passcode: string) => Promise<boolean>;
+    refreshPlan: () => Promise<void>;
+
+    // Polling actions
+    startPolling: () => void;
+    stopPolling: () => void;
 
     // Vendor actions
     addVendor: (name: string) => void;

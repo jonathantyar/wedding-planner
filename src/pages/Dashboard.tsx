@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { VendorCard } from '../components/VendorCard';
@@ -6,13 +6,16 @@ import { FloatingBudget } from '../components/FloatingBudget';
 import { SyncStatus } from '../components/SyncStatus';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { Heart, LogOut, Plus, Check, X, Users } from 'lucide-react';
+import { Card } from '../components/Card';
+import { Heart, LogOut, Plus, Check, X, Users, Search } from 'lucide-react';
+import { formatCurrency } from '../lib/utils';
 
 export const Dashboard: React.FC = () => {
-    const { currentPlan, logout, addVendor } = useStore();
+    const { currentPlan, logout, addVendor, toggleItemSelection } = useStore();
     const navigate = useNavigate();
     const [showAddVendor, setShowAddVendor] = useState(false);
     const [vendorName, setVendorName] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     if (!currentPlan) {
         navigate('/');
@@ -31,6 +34,49 @@ export const Dashboard: React.FC = () => {
             setShowAddVendor(false);
         }
     };
+
+    // Flatten all items across vendors with vendor/tag context
+    const allItems = useMemo(() => {
+        const items: Array<{
+            vendorId: string;
+            vendorName: string;
+            tagId: string;
+            tagName: string;
+            item: any;
+        }> = [];
+
+        currentPlan.vendors.forEach(vendor => {
+            vendor.tags.forEach(tag => {
+                tag.items.forEach(item => {
+                    items.push({
+                        vendorId: vendor.id,
+                        vendorName: vendor.name,
+                        tagId: tag.id,
+                        tagName: tag.name,
+                        item
+                    });
+                });
+            });
+        });
+
+        return items;
+    }, [currentPlan.vendors]);
+
+    // Filter items based on search
+    const filteredItems = useMemo(() => {
+        if (!searchQuery.trim()) return [];
+
+        return allItems.filter(({ vendorName, tagName, item }) => {
+            const query = searchQuery.toLowerCase();
+            return (
+                vendorName.toLowerCase().includes(query) ||
+                tagName.toLowerCase().includes(query) ||
+                item.name.toLowerCase().includes(query)
+            );
+        });
+    }, [allItems, searchQuery]);
+
+    const showComparison = searchQuery.trim().length > 0;
 
     return (
         <div className="min-h-screen">
@@ -76,6 +122,96 @@ export const Dashboard: React.FC = () => {
                         Manage your wedding vendors, tags, and items. Select items to include in your budget.
                     </p>
                 </div>
+
+                {/* Search for Comparison */}
+                <Card className="mb-6">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="flex-1 relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Input
+                                    type="text"
+                                    placeholder="Search items across all vendors (e.g., 'photographer', 'flowers')..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                            {showComparison && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setSearchQuery('')}
+                                >
+                                    <X className="w-4 h-4 mr-1" />
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Comparison Results */}
+                        {showComparison && (
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between border-b pb-2">
+                                    <h3 className="font-semibold text-gray-800">
+                                        Comparison Results ({filteredItems.length} items)
+                                    </h3>
+                                    <p className="text-sm text-gray-500">
+                                        Click checkboxes to include/exclude from budget
+                                    </p>
+                                </div>
+
+                                {filteredItems.length > 0 ? (
+                                    <div className="grid gap-3">
+                                        {filteredItems.map(({ vendorId, vendorName, tagId, tagName, item }) => (
+                                            <div
+                                                key={`${vendorId}-${tagId}-${item.id}`}
+                                                className="glass rounded-lg p-4 border border-gray-200 hover:border-primary-300 transition-all"
+                                            >
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex items-start gap-3 flex-1">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={item.selected}
+                                                            onChange={() => toggleItemSelection(vendorId, tagId, item.id)}
+                                                            className="mt-1 w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                                        />
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <span className="font-semibold text-gray-800">
+                                                                    {item.name}
+                                                                </span>
+                                                                <span className="text-xs px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">
+                                                                    {vendorName}
+                                                                </span>
+                                                                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                                                                    {tagName}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                                                                <span>Qty: {item.count}</span>
+                                                                <span>×</span>
+                                                                <span>{formatCurrency(item.price)}</span>
+                                                                <span>=</span>
+                                                                <span className="font-semibold text-primary-600">
+                                                                    {formatCurrency(item.count * item.price)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-center text-gray-500 py-4">
+                                        No items match your search
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </Card>
 
                 <div className="space-y-6">
                     {currentPlan.vendors.map((vendor) => (

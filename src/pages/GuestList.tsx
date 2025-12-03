@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '../store';
 import { GuestRow } from '../components/GuestRow';
 import { FloatingGuestSummary } from '../components/FloatingGuestSummary';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
-import { Users, Plus, X, DollarSign, Heart, LogOut } from 'lucide-react';
+import { Users, Plus, X, DollarSign, Heart, LogOut, Search, Filter } from 'lucide-react';
 import { SyncStatus } from '../components/SyncStatus';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,6 +16,8 @@ export const GuestList: React.FC = () => {
     const [name, setName] = useState('');
     const [occupancy, setOccupancy] = useState('1');
     const [tag, setTag] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedTagFilter, setSelectedTagFilter] = useState('');
 
     if (!currentPlan) {
         navigate('/');
@@ -38,7 +40,24 @@ export const GuestList: React.FC = () => {
         }
     };
 
+    // Get unique tags for filter dropdown
+    const uniqueTags = useMemo(() => {
+        const tags = new Set(guests.map(g => g.tag));
+        return Array.from(tags).sort();
+    }, [guests]);
+
+    // Filter guests based on search and tag filter
+    const filteredGuests = useMemo(() => {
+        return guests.filter(guest => {
+            const matchesSearch = guest.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesTag = !selectedTagFilter || guest.tag === selectedTagFilter;
+            return matchesSearch && matchesTag;
+        });
+    }, [guests, searchQuery, selectedTagFilter]);
+
     const totalGuests = guests.filter(g => g.selected).reduce((sum, g) => sum + g.occupancy, 0);
+    const filteredTotal = filteredGuests.filter(g => g.selected).reduce((sum, g) => sum + g.occupancy, 0);
+    const showFilteredStats = searchQuery || selectedTagFilter;
 
     return (
         <div className="min-h-screen">
@@ -104,10 +123,96 @@ export const GuestList: React.FC = () => {
                     </div>
                 </Card>
 
+                {/* Search and Filter */}
+                <Card className="mb-6">
+                    <div className="space-y-4">
+                        <div className="flex flex-col md:flex-row gap-3">
+                            {/* Search Input */}
+                            <div className="flex-1">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <Input
+                                        type="text"
+                                        placeholder="Search guests by name..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="pl-10"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Tag Filter */}
+                            <div className="md:w-64">
+                                <div className="relative">
+                                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <select
+                                        value={selectedTagFilter}
+                                        onChange={(e) => setSelectedTagFilter(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                                    >
+                                        <option value="">All Tags</option>
+                                        {uniqueTags.map(tag => (
+                                            <option key={tag} value={tag}>{tag}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Clear Filters */}
+                            {showFilteredStats && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setSelectedTagFilter('');
+                                    }}
+                                >
+                                    <X className="w-4 h-4 mr-1" />
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Filtered Results Summary */}
+                        {showFilteredStats && (
+                            <div className="glass rounded-lg p-3 border border-primary-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Users className="w-5 h-5 text-primary-600" />
+                                        <span className="text-sm font-semibold text-gray-700">
+                                            Filtered Results:
+                                        </span>
+                                        <span className="text-sm text-gray-600">
+                                            {filteredGuests.length} guest{filteredGuests.length !== 1 ? 's' : ''}
+                                        </span>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs text-gray-500">Selected in filter</p>
+                                        <p className="text-lg font-bold text-primary-600">
+                                            {filteredTotal} {filteredTotal === 1 ? 'person' : 'people'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </Card>
+
                 <div className="space-y-6">
-                    {guests.map((guest) => (
-                        <GuestRow key={guest.id} guest={guest} />
-                    ))}
+                    {filteredGuests.length > 0 ? (
+                        filteredGuests.map((guest) => (
+                            <GuestRow key={guest.id} guest={guest} />
+                        ))
+                    ) : (
+                        <Card>
+                            <p className="text-center text-gray-500 py-4">
+                                {searchQuery || selectedTagFilter
+                                    ? 'No guests match your search criteria'
+                                    : 'No guests yet. Add your first guest!'}
+                            </p>
+                        </Card>
+                    )}
 
                     {showAddForm ? (
                         <Card>
