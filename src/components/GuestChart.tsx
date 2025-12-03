@@ -43,6 +43,7 @@ export const GuestChart: React.FC<GuestChartProps> = ({ guests }) => {
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
+                    isAnimationActive={false}
                 >
                     {tagData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

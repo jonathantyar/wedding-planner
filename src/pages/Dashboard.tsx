@@ -37,7 +37,7 @@ export const Dashboard: React.FC = () => {
             {/* Header */}
             <div className="glass sticky top-0 z-40 border-b border-white/20">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(`/${currentPlan.id}`)}>
                         <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg">
                             <Heart className="w-4 h-4 md:w-5 md:h-5 text-white" fill="white" />
                         </div>
@@ -49,7 +49,11 @@ export const Dashboard: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="secondary" onClick={() => navigate('/guest-list')} size="sm">
+                        <Button variant="secondary" onClick={() => navigate(`/${currentPlan.id}`)} size="sm">
+                            <Heart className="w-4 h-4 md:mr-2" />
+                            <span className="hidden md:inline">Overview</span>
+                        </Button>
+                        <Button variant="secondary" onClick={() => navigate(`/${currentPlan.id}/guests`)} size="sm">
                             <Users className="w-4 h-4 md:mr-2" />
                             <span className="hidden md:inline">Guests</span>
                         </Button>

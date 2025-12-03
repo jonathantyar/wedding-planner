@@ -30,13 +30,15 @@ export const Home: React.FC = () => {
         if (isLogin) {
             const success = await login(trimmedName, trimmedPasscode);
             if (success) {
-                navigate('/dashboard');
+                const planId = useStore.getState().currentPlan?.id;
+                navigate(`/${planId}`);
             } else {
                 setError('Invalid plan name or passcode');
             }
         } else {
             await createPlan(trimmedName, trimmedPasscode);
-            navigate('/dashboard');
+            const planId = useStore.getState().currentPlan?.id;
+            navigate(`/${planId}`);
         }
     };
 

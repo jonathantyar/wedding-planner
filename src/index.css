@@ -34,12 +34,38 @@
   --font-family-sans: Inter, system-ui, sans-serif;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
 body {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  overflow-x: hidden;
+  max-width: 99.5vw;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #fef3f5 0%, #ffffff 50%, #fef9f3 100%);
   min-height: 100vh;
-  font-family: var(--font-family-sans);
+  color: var(--color-text-primary);
+  /* Kept from original body */
   transition: background-color 0.3s ease, color 0.3s ease;
+  /* Kept from original body */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
 
 .glass {

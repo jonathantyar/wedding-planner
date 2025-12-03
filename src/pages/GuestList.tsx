@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useStore } from '../store';
 import { GuestRow } from '../components/GuestRow';
-import { GuestChart } from '../components/GuestChart';
+import { FloatingGuestSummary } from '../components/FloatingGuestSummary';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
 import { Users, Plus, X, DollarSign, Heart, LogOut } from 'lucide-react';
 import { SyncStatus } from '../components/SyncStatus';
 import { useNavigate } from 'react-router-dom';
-import { FloatingBudget } from '../components/FloatingBudget';
 
 export const GuestList: React.FC = () => {
     const { guests, addGuest, currentPlan, logout } = useStore();
@@ -46,7 +45,7 @@ export const GuestList: React.FC = () => {
             {/* Header */}
             <div className="glass sticky top-0 z-40 border-b border-white/20">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(`/${currentPlan.id}`)}>
                         <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg">
                             <Heart className="w-4 h-4 md:w-5 md:h-5 text-white" fill="white" />
                         </div>
@@ -58,7 +57,11 @@ export const GuestList: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="secondary" onClick={() => navigate('/dashboard')} size="sm">
+                        <Button variant="secondary" onClick={() => navigate(`/${currentPlan.id}`)} size="sm">
+                            <Heart className="w-4 h-4 md:mr-2" />
+                            <span className="hidden md:inline">Overview</span>
+                        </Button>
+                        <Button variant="secondary" onClick={() => navigate(`/${currentPlan.id}/budget`)} size="sm">
                             <DollarSign className="w-4 h-4 md:mr-2" />
                             <span className="hidden md:inline">Budget</span>
                         </Button>
@@ -100,14 +103,6 @@ export const GuestList: React.FC = () => {
                         )}
                     </div>
                 </Card>
-
-                {/* Guest Distribution Chart */}
-                {guests.filter(g => g.selected).length > 0 && (
-                    <Card className="mb-6">
-                        <h2 className="text-xl font-bold text-gray-800 mb-4">Guest Distribution</h2>
-                        <GuestChart guests={guests} />
-                    </Card>
-                )}
 
                 <div className="space-y-6">
                     {guests.map((guest) => (
@@ -175,7 +170,7 @@ export const GuestList: React.FC = () => {
                 </div>
             </div>
 
-            <FloatingBudget />
+            <FloatingGuestSummary />
         </div>
     );
 };

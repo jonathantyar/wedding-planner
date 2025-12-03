@@ -93,7 +93,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ currentPlan, groupBy, 
                             formatter={(value: number) => formatCurrency(value)}
                             contentStyle={{ fontSize: '12px', borderRadius: '8px' }}
                         />
-                        <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                        <Bar dataKey="value" radius={[8, 8, 0, 0]} isAnimationActive={false}>
                             {data.map((_entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
@@ -110,6 +110,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ currentPlan, groupBy, 
                             outerRadius={80}
                             fill="#8884d8"
                             dataKey="value"
+                            isAnimationActive={false}
                         >
                             {data.map((_entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

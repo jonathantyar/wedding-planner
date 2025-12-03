@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { Dashboard } from './pages/Dashboard';
 import { GuestList } from './pages/GuestList';
+import { Overview } from './pages/Overview';
+import { PlanGuard } from './components/PlanGuard';
 import './index.css';
 
 function App() {
@@ -9,8 +11,13 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/guest-list" element={<GuestList />} />
+
+        <Route path="/:planId" element={<PlanGuard />}>
+          <Route index element={<Overview />} />
+          <Route path="budget" element={<Dashboard />} />
+          <Route path="guests" element={<GuestList />} />
+        </Route>
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
