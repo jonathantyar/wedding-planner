@@ -32,41 +32,78 @@ export const FloatingBudget: React.FC = () => {
                             </button>
                         </div>
                         <div className="space-y-3">
-                            {currentPlan.vendors.map((vendor) => {
-                                if (!vendor.selected) return null;
+                            {groupBy === 'vendor' ? (
+                                // Group by Vendor
+                                currentPlan.vendors.map((vendor) => {
+                                    if (!vendor.selected) return null;
 
-                                const vendorTotal = vendor.useSum
-                                    ? vendor.tags.reduce((sum, tag) => {
-                                        if (!tag.selected) return sum;
-                                        const tagTotal = tag.useSum
-                                            ? tag.items.reduce((s, item) => {
-                                                if (!item.selected) return s;
-                                                return s + item.count * item.price;
-                                            }, 0)
-                                            : tag.manualTotal;
-                                        return sum + tagTotal;
-                                    }, 0)
-                                    : vendor.manualTotal;
+                                    const vendorTotal = vendor.useSum
+                                        ? vendor.tags.reduce((sum, tag) => {
+                                            if (!tag.selected) return sum;
+                                            const tagTotal = tag.useSum
+                                                ? tag.items.reduce((s, item) => {
+                                                    if (!item.selected) return s;
+                                                    return s + item.count * item.price;
+                                                }, 0)
+                                                : tag.manualTotal;
+                                            return sum + tagTotal;
+                                        }, 0)
+                                        : vendor.manualTotal;
 
-                                if (vendorTotal === 0) return null;
+                                    if (vendorTotal === 0) return null;
 
-                                return (
-                                    <div key={vendor.id} className="flex justify-between text-sm">
-                                        <span className="text-gray-700">{vendor.name}</span>
-                                        <span className="font-medium text-gray-900">
-                                            {formatCurrency(vendorTotal)}
-                                        </span>
-                                    </div>
-                                );
-                            })}
+                                    return (
+                                        <div key={vendor.id} className="flex justify-between text-sm">
+                                            <span className="text-gray-700">{vendor.name}</span>
+                                            <span className="font-medium text-gray-900">
+                                                {formatCurrency(vendorTotal)}
+                                            </span>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                // Group by Category (Tag)
+                                (() => {
+                                    const tagMap = new Map<string, number>();
+
+                                    currentPlan.vendors.forEach(vendor => {
+                                        if (!vendor.selected) return;
+
+                                        vendor.tags.forEach(tag => {
+                                            if (!tag.selected) return;
+
+                                            const tagTotal = tag.useSum
+                                                ? tag.items
+                                                    .filter(item => item.selected)
+                                                    .reduce((sum, item) => sum + item.count * item.price, 0)
+                                                : tag.manualTotal;
+
+                                            if (tagTotal > 0) {
+                                                tagMap.set(tag.name, (tagMap.get(tag.name) || 0) + tagTotal);
+                                            }
+                                        });
+                                    });
+
+                                    return Array.from(tagMap.entries())
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([tagName, total]) => (
+                                            <div key={tagName} className="flex justify-between text-sm">
+                                                <span className="text-gray-700">{tagName}</span>
+                                                <span className="font-medium text-gray-900">
+                                                    {formatCurrency(total)}
+                                                </span>
+                                            </div>
+                                        ));
+                                })()
+                            )}
 
                             <div className="mt-4 mb-4">
                                 <div className="flex gap-2 mb-2">
                                     <button
                                         onClick={() => setGroupBy('vendor')}
                                         className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${groupBy === 'vendor'
-                                                ? 'bg-primary-600 text-white'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-primary-600 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
                                         By Vendor
@@ -74,8 +111,8 @@ export const FloatingBudget: React.FC = () => {
                                     <button
                                         onClick={() => setGroupBy('tag')}
                                         className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${groupBy === 'tag'
-                                                ? 'bg-primary-600 text-white'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-primary-600 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
                                         By Category
@@ -85,8 +122,8 @@ export const FloatingBudget: React.FC = () => {
                                     <button
                                         onClick={() => setChartType('bar')}
                                         className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${chartType === 'bar'
-                                                ? 'bg-accent-600 text-white'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-accent-600 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
                                         Bar Chart
@@ -94,8 +131,8 @@ export const FloatingBudget: React.FC = () => {
                                     <button
                                         onClick={() => setChartType('pie')}
                                         className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${chartType === 'pie'
-                                                ? 'bg-accent-600 text-white'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-accent-600 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
                                         Pie Chart
