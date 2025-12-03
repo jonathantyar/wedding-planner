@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { Heart, DollarSign, Users, LogOut } from 'lucide-react';
+import { Heart, DollarSign, Users, LogOut, Share2 } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 
 export const Overview: React.FC = () => {
     const { currentPlan, logout, calculateBudget, guests } = useStore();
     const navigate = useNavigate();
+    const [shareMessage, setShareMessage] = useState('');
 
     if (!currentPlan) return null;
 
@@ -18,6 +19,35 @@ export const Overview: React.FC = () => {
     const handleLogout = () => {
         logout();
         navigate('/');
+    };
+
+    const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/${currentPlan.id}`;
+        const shareData = {
+            title: `${currentPlan.name} - Wedding Plan`,
+            text: `Check out our wedding plan! 💍`,
+            url: shareUrl
+        };
+
+        try {
+            // Try to use native share API (mobile devices)
+            if (navigator.share) {
+                await navigator.share(shareData);
+                setShareMessage('Shared successfully!');
+            } else {
+                // Fallback: copy to clipboard
+                await navigator.clipboard.writeText(shareUrl);
+                setShareMessage('Link copied to clipboard!');
+            }
+
+            // Clear message after 3 seconds
+            setTimeout(() => setShareMessage(''), 3000);
+        } catch (err) {
+            // User cancelled or error occurred
+            if ((err as Error).name !== 'AbortError') {
+                console.error('Error sharing:', err);
+            }
+        }
     };
 
     return (
@@ -37,6 +67,10 @@ export const Overview: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button variant="secondary" onClick={handleShare} size="sm">
+                            <Share2 className="w-4 h-4 md:mr-2" />
+                            <span className="hidden md:inline">Share</span>
+                        </Button>
                         <Button variant="ghost" onClick={handleLogout} size="sm" className="md:px-4 md:py-2">
                             <LogOut className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
                             <span className="hidden md:inline">Logout</span>
@@ -44,6 +78,18 @@ export const Overview: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Share Success Message */}
+            {shareMessage && (
+                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top">
+                    <div className="glass px-6 py-3 rounded-lg shadow-xl border-2 border-green-200">
+                        <p className="text-green-700 font-semibold flex items-center gap-2">
+                            <Share2 className="w-4 h-4" />
+                            {shareMessage}
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content */}
             <div className="max-w-4xl mx-auto px-4 py-8">
