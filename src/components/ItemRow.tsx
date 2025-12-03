@@ -4,6 +4,7 @@ import type { Item } from '../types';
 import { Trash2, Edit2, Check, X } from 'lucide-react';
 import { Button } from './Button';
 import { Input } from './Input';
+import { CurrencyInput } from './CurrencyInput';
 import { formatCurrency } from '../lib/utils';
 
 interface ItemRowProps {
@@ -61,12 +62,11 @@ export const ItemRow: React.FC<ItemRowProps> = ({ vendorId, tagId, item }) => {
                     className="w-24 py-2"
                     placeholder="Count"
                 />
-                <Input
-                    type="number"
+                <CurrencyInput
                     value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="w-32 py-2"
+                    onChange={(value) => setPrice(value)}
                     placeholder="Price"
+                    className="w-24 text-sm"
                 />
                 <Button size="sm" variant="primary" onClick={handleSave}>
                     <Check className="w-4 h-4" />

@@ -36,8 +36,11 @@ export const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
 
     const vendorTotal = vendor.useSum
         ? vendor.tags.reduce((sum, tag) => {
+            if (!tag.selected) return sum;
             const tagTotal = tag.useSum
-                ? tag.items.reduce((s, item) => s + item.count * item.price, 0)
+                ? tag.items
+                    .filter(item => item.selected)
+                    .reduce((itemSum, item) => itemSum + item.count * item.price, 0)
                 : tag.manualTotal;
             return sum + tagTotal;
         }, 0)
@@ -161,7 +164,7 @@ export const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
                             size="sm"
                             variant="secondary"
                             onClick={() => setShowAddTag(true)}
-                            className="w-full flex items-center justify-center"
+                            className="w-full flex items-center justify-center mt-3"
                         >
                             <Plus className="w-4 h-4 mr-2" />
                             <span>Add Category</span>

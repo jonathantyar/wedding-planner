@@ -4,6 +4,7 @@ import type { Tag } from '../types';
 import { ItemRow } from './ItemRow';
 import { Button } from './Button';
 import { Input } from './Input';
+import { CurrencyInput } from './CurrencyInput';
 import { Plus, Trash2, Edit2, Check, X } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 
@@ -44,7 +45,9 @@ export const TagSection: React.FC<TagSectionProps> = ({ vendorId, tag }) => {
     };
 
     const tagTotal = tag.useSum
-        ? tag.items.reduce((sum, item) => sum + item.count * item.price, 0)
+        ? tag.items
+            .filter(item => item.selected)
+            .reduce((sum, item) => sum + item.count * item.price, 0)
         : tag.manualTotal;
 
     return (
@@ -154,11 +157,10 @@ export const TagSection: React.FC<TagSectionProps> = ({ vendorId, tag }) => {
                             onChange={(e) => setItemCount(e.target.value)}
                             className="w-20 flex-shrink-0 text-sm"
                         />
-                        <Input
-                            type="number"
+                        <CurrencyInput
                             placeholder="Price"
                             value={itemPrice}
-                            onChange={(e) => setItemPrice(e.target.value)}
+                            onChange={(value) => setItemPrice(value)}
                             className="flex-1 text-sm"
                         />
                         <Button size="sm" variant="ghost" onClick={() => setShowAddItem(false)} className="flex-shrink-0">
@@ -174,7 +176,7 @@ export const TagSection: React.FC<TagSectionProps> = ({ vendorId, tag }) => {
                     size="sm"
                     variant="secondary"
                     onClick={() => setShowAddItem(true)}
-                    className="w-full flex items-center justify-center"
+                    className="w-full flex items-center justify-center mt-3"
                 >
                     <Plus className="w-4 h-4 mr-2" />
                     <span>Add Item</span>

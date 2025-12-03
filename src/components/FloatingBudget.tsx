@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useStore } from '../store';
+import { BudgetChart } from './BudgetChart';
 import { Calculator } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 
 export const FloatingBudget: React.FC = () => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = React.useState(false);
+    const [groupBy, setGroupBy] = React.useState<'vendor' | 'tag'>('vendor');
+    const [chartType, setChartType] = React.useState<'bar' | 'pie'>('bar');
     const { currentPlan, calculateBudget } = useStore();
 
     if (!currentPlan) return null;
@@ -56,6 +59,51 @@ export const FloatingBudget: React.FC = () => {
                                     </div>
                                 );
                             })}
+
+                            <div className="mt-4 mb-4">
+                                <div className="flex gap-2 mb-2">
+                                    <button
+                                        onClick={() => setGroupBy('vendor')}
+                                        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${groupBy === 'vendor'
+                                                ? 'bg-primary-600 text-white'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        By Vendor
+                                    </button>
+                                    <button
+                                        onClick={() => setGroupBy('tag')}
+                                        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${groupBy === 'tag'
+                                                ? 'bg-primary-600 text-white'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        By Category
+                                    </button>
+                                </div>
+                                <div className="flex gap-2 mb-3">
+                                    <button
+                                        onClick={() => setChartType('bar')}
+                                        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${chartType === 'bar'
+                                                ? 'bg-accent-600 text-white'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        Bar Chart
+                                    </button>
+                                    <button
+                                        onClick={() => setChartType('pie')}
+                                        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${chartType === 'pie'
+                                                ? 'bg-accent-600 text-white'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        Pie Chart
+                                    </button>
+                                </div>
+                                <BudgetChart currentPlan={currentPlan} groupBy={groupBy} chartType={chartType} />
+                            </div>
+
                             <div className="border-t-2 border-gray-200 pt-3 mt-2">
                                 <div className="flex justify-between font-bold text-lg">
                                     <span className="text-gray-800">Total</span>
