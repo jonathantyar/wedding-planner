@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '../components/Button';
 
 export const SyncStatus: React.FC = () => {
     const { lastSynced, currentPlan } = useStore();
-    const [isSyncing, setIsSyncing] = React.useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [, setTick] = useState(0); // Force re-render
+
+    // Update the display every 10 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTick(t => t + 1);
+        }, 10000); // Update every 10 seconds
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleManualSync = async () => {
         if (!currentPlan) return;

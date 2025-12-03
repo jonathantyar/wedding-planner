@@ -187,19 +187,28 @@ export const useStore = create<Store>()(
                     ...currentPlan,
                     vendors: currentPlan.vendors.map((v) => {
                         if (v.id === vendorId) {
-                            // If deselecting vendor, deselect all tags and items
-                            if (!newSelected) {
+                            // If selecting vendor, select all tags and items
+                            if (newSelected) {
                                 return {
                                     ...v,
-                                    selected: false,
+                                    selected: true,
                                     tags: v.tags.map(t => ({
                                         ...t,
-                                        selected: false,
-                                        items: t.items.map(i => ({ ...i, selected: false }))
+                                        selected: true,
+                                        items: t.items.map(i => ({ ...i, selected: true }))
                                     }))
                                 };
                             }
-                            return { ...v, selected: true };
+                            // If deselecting vendor, deselect all tags and items
+                            return {
+                                ...v,
+                                selected: false,
+                                tags: v.tags.map(t => ({
+                                    ...t,
+                                    selected: false,
+                                    items: t.items.map(i => ({ ...i, selected: false }))
+                                }))
+                            };
                         }
                         return v;
                     }),
@@ -308,15 +317,20 @@ export const useStore = create<Store>()(
                         if (v.id === vendorId) {
                             const updatedTags = v.tags.map((t) => {
                                 if (t.id === tagId) {
-                                    // If deselecting tag, deselect all items
-                                    if (!newSelected) {
+                                    // If selecting tag, select all items
+                                    if (newSelected) {
                                         return {
                                             ...t,
-                                            selected: false,
-                                            items: t.items.map(i => ({ ...i, selected: false }))
+                                            selected: true,
+                                            items: t.items.map(i => ({ ...i, selected: true }))
                                         };
                                     }
-                                    return { ...t, selected: true };
+                                    // If deselecting tag, deselect all items
+                                    return {
+                                        ...t,
+                                        selected: false,
+                                        items: t.items.map(i => ({ ...i, selected: false }))
+                                    };
                                 }
                                 return t;
                             });
@@ -550,9 +564,21 @@ export const useStore = create<Store>()(
     )
 );
 
-// Subscribe to changes and sync to Supabase
+// Debounced save to prevent excessive API calls during rapid state changes
+let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+const debouncedSaveToSupabase = (plan: WeddingPlan) => {
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+    }
+    saveTimeout = setTimeout(() => {
+        saveToSupabase(plan);
+        saveTimeout = null;
+    }, 500); // Wait 500ms after last change before syncing
+};
+
+// Subscribe to changes and sync to Supabase (debounced)
 useStore.subscribe((state) => {
     if (state.currentPlan) {
-        saveToSupabase(state.currentPlan);
+        debouncedSaveToSupabase(state.currentPlan);
     }
 });
