@@ -32,15 +32,25 @@ export interface WeddingPlan {
     createdAt: number;
 }
 
+export interface Guest {
+    id: string;
+    name: string;
+    occupancy: number; // Number of people this guest brings
+    tag: string; // Group/category like "Family", "Work Friends", etc.
+    selected: boolean; // Whether to include in count
+}
+
 export interface Store {
     plans: WeddingPlan[];
     currentPlan: WeddingPlan | null;
     lastSynced: number | null;
+    guests: Guest[];
 
     // Plan actions
     createPlan: (name: string, passcode: string) => Promise<void>;
     login: (name: string, passcode: string) => Promise<boolean>;
     logout: () => void;
+    loadPlanById: (planId: string, passcode: string) => Promise<boolean>;
 
     // Vendor actions
     addVendor: (name: string) => void;
@@ -59,6 +69,12 @@ export interface Store {
     updateItem: (vendorId: string, tagId: string, itemId: string, updates: Partial<Item>) => void;
     deleteItem: (vendorId: string, tagId: string, itemId: string) => void;
     toggleItemSelection: (vendorId: string, tagId: string, itemId: string) => void;
+
+    // Guest actions
+    addGuest: (name: string, occupancy: number, tag: string) => Promise<void>;
+    updateGuest: (guestId: string, updates: Partial<Guest>) => Promise<void>;
+    deleteGuest: (guestId: string) => Promise<void>;
+    loadGuests: (planId: string) => Promise<void>;
 
     // Budget calculation
     calculateBudget: () => number;

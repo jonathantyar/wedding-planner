@@ -6,7 +6,7 @@ import { FloatingBudget } from '../components/FloatingBudget';
 import { SyncStatus } from '../components/SyncStatus';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { Heart, LogOut, Plus, Check, X } from 'lucide-react';
+import { Heart, LogOut, Plus, Check, X, Users } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
     const { currentPlan, logout, addVendor } = useStore();
@@ -48,10 +48,16 @@ export const Dashboard: React.FC = () => {
                             <p className="text-xs md:text-sm text-gray-600">Wedding Planner</p>
                         </div>
                     </div>
-                    <Button variant="ghost" onClick={handleLogout} size="sm" className="md:px-4 md:py-2">
-                        <LogOut className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
-                        <span className="hidden md:inline">Logout</span>
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button variant="secondary" onClick={() => navigate('/guest-list')} size="sm">
+                            <Users className="w-4 h-4 md:mr-2" />
+                            <span className="hidden md:inline">Guests</span>
+                        </Button>
+                        <Button variant="ghost" onClick={handleLogout} size="sm" className="md:px-4 md:py-2">
+                            <LogOut className="w-4 h-4 md:w-5 md:h-5 md:mr-2" />
+                            <span className="hidden md:inline">Logout</span>
+                        </Button>
+                    </div>
                 </div>
             </div>
 

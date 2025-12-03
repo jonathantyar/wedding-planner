@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Store, WeddingPlan, Vendor, Tag, Item } from './types';
+import type { Store, WeddingPlan, Vendor, Tag, Item, Guest } from './types';
 
 import { supabase } from './lib/supabase';
 
@@ -34,6 +34,7 @@ export const useStore = create<Store>()(
             plans: [],
             currentPlan: null,
             lastSynced: null,
+            guests: [],
 
             createPlan: async (name: string, passcode: string) => {
                 const newPlan: WeddingPlan = {
@@ -61,6 +62,8 @@ export const useStore = create<Store>()(
 
                 if (localPlan) {
                     set({ currentPlan: localPlan });
+                    // Load guests for this plan
+                    await get().loadGuests(localPlan.id);
                     // Background sync check
                     try {
                         const { data } = await supabase
@@ -101,6 +104,8 @@ export const useStore = create<Store>()(
                             plans: [...state.plans, plan],
                             currentPlan: plan
                         }));
+                        // Load guests for this plan
+                        await get().loadGuests(plan.id);
                         return true;
                     }
                 } catch (e) {
@@ -556,6 +561,156 @@ export const useStore = create<Store>()(
                 });
 
                 return total;
+            },
+
+            loadPlanById: async (planId: string, passcode: string) => {
+                try {
+                    const { data } = await supabase
+                        .from('wedding_plans')
+                        .select('data')
+                        .eq('id', planId)
+                        .eq('passcode', passcode)
+                        .single();
+
+                    if (data && data.data) {
+                        const plan = data.data as WeddingPlan;
+                        set((state) => ({
+                            plans: [...state.plans.filter(p => p.id !== plan.id), plan],
+                            currentPlan: plan
+                        }));
+                        // Load guests for this plan
+                        await get().loadGuests(planId);
+                        return true;
+                    }
+                } catch (e) {
+                    console.error("Load plan error", e);
+                }
+                return false;
+            },
+
+            addGuest: async (name: string, occupancy: number, tag: string) => {
+                const currentPlan = get().currentPlan;
+                if (!currentPlan) return;
+
+                const guestId = generateId();
+                const newGuest: Guest = {
+                    id: guestId,
+                    name,
+                    occupancy,
+                    tag,
+                    selected: true
+                };
+
+                // Add to state immediately for better UX
+                set((state) => ({
+                    guests: [...state.guests, newGuest]
+                }));
+
+                // Save to Supabase in background
+                try {
+                    const { error } = await supabase
+                        .from('wedding_guests')
+                        .insert({
+                            id: guestId,
+                            plan_id: currentPlan.id,
+                            name,
+                            occupancy,
+                            tag,
+                            selected: true
+                        });
+
+                    if (error) {
+                        console.error('Error adding guest:', error);
+                        // Rollback on error
+                        set((state) => ({
+                            guests: state.guests.filter(g => g.id !== guestId)
+                        }));
+                    }
+                } catch (err) {
+                    console.error('Error adding guest:', err);
+                    // Rollback on error
+                    set((state) => ({
+                        guests: state.guests.filter(g => g.id !== guestId)
+                    }));
+                }
+            },
+
+            updateGuest: async (guestId: string, updates: Partial<Guest>) => {
+                const currentPlan = get().currentPlan;
+                if (!currentPlan) return;
+
+                try {
+                    const { error } = await supabase
+                        .from('wedding_guests')
+                        .update(updates)
+                        .eq('id', guestId)
+                        .eq('plan_id', currentPlan.id);
+
+                    if (error) {
+                        console.error('Error updating guest:', error);
+                        return;
+                    }
+
+                    set((state) => ({
+                        guests: state.guests.map(g =>
+                            g.id === guestId ? { ...g, ...updates } : g
+                        )
+                    }));
+                } catch (err) {
+                    console.error('Error updating guest:', err);
+                }
+            },
+
+            deleteGuest: async (guestId: string) => {
+                const currentPlan = get().currentPlan;
+                if (!currentPlan) return;
+
+                try {
+                    const { error } = await supabase
+                        .from('wedding_guests')
+                        .delete()
+                        .eq('id', guestId)
+                        .eq('plan_id', currentPlan.id);
+
+                    if (error) {
+                        console.error('Error deleting guest:', error);
+                        return;
+                    }
+
+                    set((state) => ({
+                        guests: state.guests.filter(g => g.id !== guestId)
+                    }));
+                } catch (err) {
+                    console.error('Error deleting guest:', err);
+                }
+            },
+
+            loadGuests: async (planId: string) => {
+                try {
+                    const { data, error } = await supabase
+                        .from('wedding_guests')
+                        .select('*')
+                        .eq('plan_id', planId);
+
+                    if (error) {
+                        console.error('Error loading guests:', error);
+                        return;
+                    }
+
+                    if (data) {
+                        const guests: Guest[] = data.map((row: any) => ({
+                            id: row.id,
+                            name: row.name,
+                            occupancy: row.occupancy,
+                            tag: row.tag,
+                            selected: row.selected !== undefined ? row.selected : true
+                        }));
+
+                        set({ guests });
+                    }
+                } catch (err) {
+                    console.error('Error loading guests:', err);
+                }
             },
         }),
         {

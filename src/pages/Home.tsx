@@ -19,20 +19,23 @@ export const Home: React.FC = () => {
         e.preventDefault();
         setError('');
 
-        if (!name.trim() || !passcode.trim()) {
+        const trimmedName = name.trim();
+        const trimmedPasscode = passcode.trim();
+
+        if (!trimmedName || !trimmedPasscode) {
             setError('Please fill in all fields');
             return;
         }
 
         if (isLogin) {
-            const success = await login(name, passcode);
+            const success = await login(trimmedName, trimmedPasscode);
             if (success) {
                 navigate('/dashboard');
             } else {
                 setError('Invalid plan name or passcode');
             }
         } else {
-            await createPlan(name, passcode);
+            await createPlan(trimmedName, trimmedPasscode);
             navigate('/dashboard');
         }
     };
