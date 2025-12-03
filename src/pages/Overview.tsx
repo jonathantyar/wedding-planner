@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { Button } from '../components/Button';
@@ -15,6 +15,58 @@ export const Overview: React.FC = () => {
 
     const budget = calculateBudget();
     const totalGuests = guests.filter(g => g.selected).reduce((sum, g) => sum + g.occupancy, 0);
+
+    // Update meta tags for SEO
+    useEffect(() => {
+        const planTitle = `${currentPlan.name} - Wedding Overview`;
+        const planDescription = `Wedding plan for ${currentPlan.name}. Budget: ${formatCurrency(budget)}, Guests: ${totalGuests}. Manage your dream wedding with our free planner.`;
+
+        // Update title
+        document.title = planTitle;
+
+        // Update meta description
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+            metaDescription.setAttribute('content', planDescription);
+        }
+
+        // Update Open Graph tags
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) {
+            ogTitle.setAttribute('content', planTitle);
+        }
+
+        const ogDescription = document.querySelector('meta[property="og:description"]');
+        if (ogDescription) {
+            ogDescription.setAttribute('content', planDescription);
+        }
+
+        const ogUrl = document.querySelector('meta[property="og:url"]');
+        if (ogUrl) {
+            ogUrl.setAttribute('content', `${window.location.origin}/${currentPlan.id}`);
+        }
+
+        // Update Twitter Card tags
+        const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twitterTitle) {
+            twitterTitle.setAttribute('content', planTitle);
+        }
+
+        const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+        if (twitterDescription) {
+            twitterDescription.setAttribute('content', planDescription);
+        }
+
+        const twitterUrl = document.querySelector('meta[name="twitter:url"]');
+        if (twitterUrl) {
+            twitterUrl.setAttribute('content', `${window.location.origin}/${currentPlan.id}`);
+        }
+
+        // Cleanup: restore original tags when component unmounts
+        return () => {
+            document.title = 'Wedding Planner - Plan Your Perfect Day | Budget & Guest Management';
+        };
+    }, [currentPlan.name, currentPlan.id, budget, totalGuests]);
 
     const handleLogout = () => {
         logout();
