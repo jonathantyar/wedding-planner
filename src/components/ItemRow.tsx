@@ -42,16 +42,18 @@ export const ItemRow: React.FC<ItemRowProps> = ({ vendorId, tagId, item }) => {
     if (isEditing) {
         return (
             <div className="flex items-center gap-2 p-3 bg-white/50 rounded-lg">
-                <input
+                {/* <input
                     type="checkbox"
                     checked={item.selected}
                     onChange={() => toggleItemSelection(vendorId, tagId, item.id)}
+                    onClick={(e) => e.stopPropagation()}
                     className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
+                /> */}
                 <Input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
                     className="flex-1 py-2"
                     placeholder="Item name"
                 />
@@ -59,19 +61,21 @@ export const ItemRow: React.FC<ItemRowProps> = ({ vendorId, tagId, item }) => {
                     type="number"
                     value={count}
                     onChange={(e) => setCount(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
                     className="w-24 py-2"
                     placeholder="Count"
                 />
                 <CurrencyInput
                     value={price}
                     onChange={(value) => setPrice(value)}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     placeholder="Price"
                     className="w-24 text-sm"
                 />
-                <Button size="sm" variant="primary" onClick={handleSave}>
+                <Button size="sm" variant="primary" onClick={(e) => { e.stopPropagation(); handleSave(); }}>
                     <Check className="w-4 h-4" />
                 </Button>
-                <Button size="sm" variant="ghost" onClick={handleCancel}>
+                <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleCancel(); }}>
                     <X className="w-4 h-4" />
                 </Button>
             </div>
@@ -98,7 +102,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({ vendorId, tagId, item }) => {
                     {formatCurrency(total)}
                 </div>
                 <div className="flex items-center gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => setIsEditing(true)} className="p-1 h-8 w-8">
+                    <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="p-1 h-8 w-8">
                         <Edit2 className="w-4 h-4" />
                     </Button>
                     <Button

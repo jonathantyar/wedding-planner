@@ -200,20 +200,6 @@ export const GuestList: React.FC = () => {
                 </Card>
 
                 <div className="space-y-6">
-                    {filteredGuests.length > 0 ? (
-                        filteredGuests.map((guest) => (
-                            <GuestRow key={guest.id} guest={guest} />
-                        ))
-                    ) : (
-                        <Card>
-                            <p className="text-center text-gray-500 py-4">
-                                {searchQuery || selectedTagFilter
-                                    ? 'No guests match your search criteria'
-                                    : 'No guests yet. Add your first guest!'}
-                            </p>
-                        </Card>
-                    )}
-
                     {showAddForm ? (
                         <Card>
                             <div className="flex items-center justify-between mb-4">
@@ -264,6 +250,20 @@ export const GuestList: React.FC = () => {
                             <Plus className="w-5 h-5 mr-2" />
                             Add Guest
                         </Button>
+                    )}
+
+                    {filteredGuests.length > 0 ? (
+                        filteredGuests.map((guest) => (
+                            <GuestRow key={guest.id} guest={guest} />
+                        ))
+                    ) : (
+                        <Card>
+                            <p className="text-center text-gray-500 py-4">
+                                {searchQuery || selectedTagFilter
+                                    ? 'No guests match your search criteria'
+                                    : 'No guests yet. Add your first guest!'}
+                            </p>
+                        </Card>
                     )}
 
                     {guests.length === 0 && !showAddForm && (

@@ -75,6 +75,38 @@ export const VendorModal: React.FC<VendorModalProps> = ({ vendor, isOpen, onClos
                     )}
                 </div>
 
+
+                {/* Add Tag */}
+                <div className="mt-4">
+                    {showAddTag ? (
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Category name (e.g., Food, Decoration)"
+                                value={tagName}
+                                onChange={(e) => setTagName(e.target.value)}
+                                className="flex-1"
+                                autoFocus
+                            />
+                            <Button size="sm" onClick={handleAddTag}>
+                                <Check className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setShowAddTag(false)}>
+                                <XIcon className="w-4 h-4" />
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setShowAddTag(true)}
+                            className="w-full flex items-center justify-center mt-3"
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            <span>Add Category</span>
+                        </Button>
+                    )}
+                </div>
+
                 {/* Tags List */}
                 <div className="space-y-3">
                     {vendor.tags.map((tag) => {
@@ -126,37 +158,6 @@ export const VendorModal: React.FC<VendorModalProps> = ({ vendor, isOpen, onClos
                             </div>
                         );
                     })}
-                </div>
-
-                {/* Add Tag */}
-                <div className="mt-4">
-                    {showAddTag ? (
-                        <div className="flex gap-2">
-                            <Input
-                                placeholder="Category name (e.g., Food, Decoration)"
-                                value={tagName}
-                                onChange={(e) => setTagName(e.target.value)}
-                                className="flex-1"
-                                autoFocus
-                            />
-                            <Button size="sm" onClick={handleAddTag}>
-                                <Check className="w-4 h-4" />
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setShowAddTag(false)}>
-                                <XIcon className="w-4 h-4" />
-                            </Button>
-                        </div>
-                    ) : (
-                        <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => setShowAddTag(true)}
-                            className="w-full flex items-center justify-center mt-3"
-                        >
-                            <Plus className="w-4 h-4 mr-2" />
-                            <span>Add Category</span>
-                        </Button>
-                    )}
                 </div>
             </Modal>
 

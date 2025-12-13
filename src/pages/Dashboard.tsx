@@ -124,7 +124,7 @@ export const Dashboard: React.FC = () => {
                 </div>
 
                 {/* Search for Comparison */}
-                <Card className="mb-6">
+                <Card className="mb-6 pb-6">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="flex-1 relative">
@@ -214,10 +214,6 @@ export const Dashboard: React.FC = () => {
                 </Card>
 
                 <div className="space-y-6">
-                    {currentPlan.vendors.map((vendor) => (
-                        <VendorCard key={vendor.id} vendor={vendor} />
-                    ))}
-
                     {showAddVendor ? (
                         <div className="glass rounded-2xl p-4 flex items-center gap-3">
                             <Input
@@ -247,6 +243,13 @@ export const Dashboard: React.FC = () => {
                         </button>
                     )}
                 </div>
+
+                <div className='space-y-6 mt-6'>
+                    {currentPlan.vendors.map((vendor) => (
+                        <VendorCard key={vendor.id} vendor={vendor} />
+                    ))}
+                </div>
+
 
                 {currentPlan.vendors.length === 0 && !showAddVendor && (
                     <div className="text-center py-16">

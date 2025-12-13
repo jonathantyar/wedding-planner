@@ -12,7 +12,7 @@ export const SyncStatus: React.FC = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             setTick(t => t + 1);
-        }, 10000); // Update every 10 seconds
+        }, 100000); // Update every 10 seconds
 
         return () => clearInterval(interval);
     }, []);
