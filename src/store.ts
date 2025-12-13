@@ -503,6 +503,43 @@ export const useStore = create<Store>()((set, get) => ({
         return total;
     },
 
+    calculateBudgetBreakdown: () => {
+        const currentPlan = get().currentPlan;
+        if (!currentPlan) return { total: 0, paid: 0, remaining: 0 };
+
+        let total = 0;
+        let paid = 0;
+
+        currentPlan.vendors.forEach((vendor) => {
+            if (vendor.selected) {
+                if (vendor.useSum) {
+                    vendor.tags.forEach((tag) => {
+                        if (tag.selected) {
+                            if (tag.useSum) {
+                                tag.items.forEach((item) => {
+                                    if (item.selected) {
+                                        const itemTotal = item.count * item.price;
+                                        if (itemTotal >= 0) {
+                                            total += itemTotal;
+                                        } else {
+                                            paid += Math.abs(itemTotal);
+                                        }
+                                    }
+                                });
+                            } else {
+                                total += tag.manualTotal;
+                            }
+                        }
+                    });
+                } else {
+                    total += vendor.manualTotal;
+                }
+            }
+        });
+
+        return { total, paid, remaining: total - paid };
+    },
+
     loadPlanById: async (planId: string, passcode: string) => {
         set({ isLoading: true });
 

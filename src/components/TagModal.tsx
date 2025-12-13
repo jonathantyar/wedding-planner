@@ -107,13 +107,17 @@ const EditableItem: React.FC<EditableItemProps> = ({
                 <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-800 truncate">{item.name}</h4>
-                        <p className="text-xs text-gray-600">
-                            {item.count} × {formatCurrency(item.price)}
+                        <p className={`text-xs ${item.price < 0 ? 'text-green-600 font-medium' : 'text-gray-600'}`}>
+                            {item.price < 0 ? (
+                                <>Payment: {formatCurrency(Math.abs(item.count * item.price))}</>
+                            ) : (
+                                <>{item.count} × {formatCurrency(item.price)}</>
+                            )}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-primary-700 text-sm">
-                            {formatCurrency(item.count * item.price)}
+                        <span className={`font-semibold text-sm ${item.price < 0 ? 'text-green-600' : 'text-primary-700'}`}>
+                            {item.price < 0 ? '-' : ''}{formatCurrency(Math.abs(item.count * item.price))}
                         </span>
                         <Button
                             size="sm"
@@ -147,7 +151,7 @@ export const TagModal: React.FC<TagModalProps> = ({ vendor, tag, isOpen, onClose
     const { addItem } = useStore();
     const [isEditing, setIsEditing] = useState(false);
     const [tagName, setTagName] = useState(tag.name);
-    const [showAddItem, setShowAddItem] = useState(false);
+    const [showAddItem, setShowAddItem] = useState<'item' | 'payment' | false>(false);
     const [itemName, setItemName] = useState('');
     const [itemCount, setItemCount] = useState('1');
     const [itemPrice, setItemPrice] = useState('0');
@@ -163,9 +167,15 @@ export const TagModal: React.FC<TagModalProps> = ({ vendor, tag, isOpen, onClose
         }
     };
 
-    const handleAddItem = () => {
+    const handleAddItem = (isPayment: boolean = false) => {
         if (itemName.trim() && itemPrice) {
-            addItem(vendor.id, tag.id, itemName, parseFloat(itemCount) || 1, parseFloat(itemPrice) || 0);
+            let price = parseFloat(itemPrice) || 0;
+            // If it's a payment, ensure price is negative
+            if (isPayment) {
+                price = -Math.abs(price);
+            }
+
+            addItem(vendor.id, tag.id, itemName, parseFloat(itemCount) || 1, price);
             setItemName('');
             setItemCount('1');
             setItemPrice('0');
@@ -176,12 +186,13 @@ export const TagModal: React.FC<TagModalProps> = ({ vendor, tag, isOpen, onClose
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={tag.name}>
             {/* Add Item */}
-            <div className="mt-4">
+            {/* Add Item / Payment */}
+            <div className="mt-4 mb-6">
                 {showAddItem ? (
                     <div className="glass rounded-lg p-3">
                         <div className="flex flex-col gap-2">
                             <Input
-                                placeholder="Item Name"
+                                placeholder={showAddItem === 'payment' ? "Payment Name (e.g. Down Payment)" : "Item Name"}
                                 value={itemName}
                                 onChange={(e) => setItemName(e.target.value)}
                                 className="w-full text-sm"
@@ -196,30 +207,46 @@ export const TagModal: React.FC<TagModalProps> = ({ vendor, tag, isOpen, onClose
                                     className="w-20 flex-shrink-0 text-sm"
                                 />
                                 <CurrencyInput
-                                    placeholder="Price"
+                                    placeholder="Amount"
                                     value={itemPrice}
                                     onChange={(value) => setItemPrice(value)}
-                                    className="flex-1 text-sm"
+                                    className={`flex-1 text-sm ${showAddItem === 'payment' ? 'text-green-600' : ''}`}
                                 />
                                 <Button size="sm" variant="ghost" onClick={() => setShowAddItem(false)}>
                                     <X className="w-4 h-4" />
                                 </Button>
-                                <Button size="sm" onClick={handleAddItem} disabled={!itemName.trim() || !itemPrice}>
+                                <Button
+                                    size="sm"
+                                    onClick={() => handleAddItem(showAddItem === 'payment')}
+                                    disabled={!itemName.trim() || !itemPrice}
+                                    variant={showAddItem === 'payment' ? 'primary' : 'primary'}
+                                >
                                     <Plus className="w-4 h-4" />
                                 </Button>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setShowAddItem(true)}
-                        className="w-full flex items-center justify-center mt-3"
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        <span>Add Item</span>
-                    </Button>
+                    <div className="flex gap-2 mt-3">
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setShowAddItem('item')}
+                            className="flex-1 flex items-center justify-center"
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            <span>Add Item</span>
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setShowAddItem('payment')}
+                            className="flex-1 flex items-center justify-center text-green-600 border border-green-200 bg-green-50 hover:bg-green-100"
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            <span>Add Payment</span>
+                        </Button>
+                    </div>
                 )}
             </div>
 

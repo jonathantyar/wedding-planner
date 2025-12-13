@@ -83,4 +83,5 @@ export interface Store {
 
     // Budget calculation
     calculateBudget: () => number;
+    calculateBudgetBreakdown: () => { total: number; paid: number; remaining: number };
 }

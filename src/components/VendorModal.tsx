@@ -108,7 +108,7 @@ export const VendorModal: React.FC<VendorModalProps> = ({ vendor, isOpen, onClos
                 </div>
 
                 {/* Tags List */}
-                <div className="space-y-3">
+                <div className="space-y-3 mt-6">
                     {vendor.tags.map((tag) => {
                         const tagTotal = tag.useSum
                             ? tag.items

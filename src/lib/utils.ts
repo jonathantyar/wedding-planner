@@ -13,3 +13,23 @@ export function formatCurrency(amount: number): string {
         maximumFractionDigits: 0,
     }).format(amount);
 }
+
+export function calculateBudgetBreakdown(items: any[]): { total: number; paid: number; remaining: number } {
+    let total = 0;
+    let paid = 0;
+
+    items.forEach(item => {
+        const itemTotal = item.count * item.price;
+        if (itemTotal >= 0) {
+            total += itemTotal;
+        } else {
+            paid += Math.abs(itemTotal);
+        }
+    });
+
+    return {
+        total,
+        paid,
+        remaining: total - paid
+    };
+}

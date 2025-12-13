@@ -8,7 +8,7 @@ export const FloatingBudget: React.FC = () => {
     const [isExpanded, setIsExpanded] = React.useState(false);
     const [groupBy, setGroupBy] = React.useState<'vendor' | 'tag'>('vendor');
     const [chartType, setChartType] = React.useState<'bar' | 'pie'>('bar');
-    const { currentPlan, calculateBudget } = useStore();
+    const { currentPlan, calculateBudget, calculateBudgetBreakdown } = useStore();
 
     if (!currentPlan) return null;
 
@@ -141,10 +141,24 @@ export const FloatingBudget: React.FC = () => {
                                 <BudgetChart currentPlan={currentPlan} groupBy={groupBy} chartType={chartType} />
                             </div>
 
-                            <div className="border-t-2 border-gray-200 pt-3 mt-2">
-                                <div className="flex justify-between font-bold text-lg">
-                                    <span className="text-gray-800">Total</span>
-                                    <span className="text-primary-600">{formatCurrency(budget)}</span>
+                            <div className="border-t-2 border-gray-200 pt-3 mt-2 grid grid-cols-3 gap-2 text-center">
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1">Total Cost</p>
+                                    <p className="font-semibold text-gray-800 text-sm md:text-base">
+                                        {formatCurrency(calculateBudgetBreakdown().total)}
+                                    </p>
+                                </div>
+                                <div className="border-l border-r border-gray-100">
+                                    <p className="text-xs text-green-600 mb-1 font-medium">Paid</p>
+                                    <p className="font-semibold text-green-700 text-sm md:text-base">
+                                        {formatCurrency(calculateBudgetBreakdown().paid)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-primary-600 mb-1 font-medium">Remaining</p>
+                                    <p className="font-bold text-primary-700 text-sm md:text-base">
+                                        {formatCurrency(calculateBudgetBreakdown().remaining)}
+                                    </p>
                                 </div>
                             </div>
                         </div>
