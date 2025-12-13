@@ -4,6 +4,7 @@ import { Dashboard } from './pages/Dashboard';
 import { GuestList } from './pages/GuestList';
 import { Overview } from './pages/Overview';
 import { PlanGuard } from './components/PlanGuard';
+import { InvitationList } from './pages/InvitationList';
 import './index.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route index element={<Overview />} />
           <Route path="budget" element={<Dashboard />} />
           <Route path="guests" element={<GuestList />} />
+          <Route path="invitations" element={<InvitationList />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

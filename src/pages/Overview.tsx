@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { Heart, DollarSign, Users, LogOut, Share2 } from 'lucide-react';
+import { Heart, DollarSign, Users, LogOut, Share2, Mail } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 
 export const Overview: React.FC = () => {
@@ -187,8 +187,29 @@ export const Overview: React.FC = () => {
                         </div>
                         <p className="text-sm text-gray-500 mt-1">Total guests</p>
                     </Card>
+
+                    {/* Invitations Card */}
+                    <Card
+                        className="p-8 cursor-pointer hover:shadow-xl transition-all group md:col-span-2 lg:col-span-1"
+                        onClick={() => navigate(`/${currentPlan.id}/invitations`)}
+                    >
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Mail className="w-6 h-6 text-purple-600" />
+                            </div>
+                            <Button variant="ghost" size="sm" className="group-hover:translate-x-1 transition-transform">
+                                Browse Themes →
+                            </Button>
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Invitations</h2>
+                        <p className="text-gray-600 mb-4">Choose and customize your wedding invitation.</p>
+                        <div className="text-3xl font-bold text-purple-600">
+                            6 Themes
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">Available designs</p>
+                    </Card>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
