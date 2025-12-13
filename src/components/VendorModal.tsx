@@ -110,11 +110,18 @@ export const VendorModal: React.FC<VendorModalProps> = ({ vendor, isOpen, onClos
                 {/* Tags List */}
                 <div className="space-y-3 mt-6">
                     {vendor.tags.map((tag) => {
-                        const tagTotal = tag.useSum
+                        const { cost, paid } = tag.useSum
                             ? tag.items
                                 .filter(item => item.selected)
-                                .reduce((sum, item) => sum + item.count * item.price, 0)
-                            : tag.manualTotal;
+                                .reduce((acc, item) => {
+                                    const total = item.count * item.price;
+                                    if (total >= 0) {
+                                        return { ...acc, cost: acc.cost + total };
+                                    } else {
+                                        return { ...acc, paid: acc.paid + Math.abs(total) };
+                                    }
+                                }, { cost: 0, paid: 0 })
+                            : { cost: tag.manualTotal, paid: 0 };
 
                         return (
                             <div key={tag.id} className="flex items-center gap-3">
@@ -139,9 +146,16 @@ export const VendorModal: React.FC<VendorModalProps> = ({ vendor, isOpen, onClos
                                             <p className="text-sm text-gray-600">{tag.items.length} items</p>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <span className="font-semibold text-accent-600">
-                                                {formatCurrency(tagTotal)}
-                                            </span>
+                                            <div className="flex flex-col items-end">
+                                                <span className="font-semibold text-accent-600">
+                                                    {formatCurrency(cost)}
+                                                </span>
+                                                {paid > 0 && (
+                                                    <span className="text-xs font-semibold text-green-600">
+                                                        Paid: {formatCurrency(paid)}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <Button
                                                 size="sm"
                                                 variant="ghost"

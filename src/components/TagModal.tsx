@@ -103,10 +103,11 @@ const EditableItem: React.FC<EditableItemProps> = ({
                     className="w-5 h-5 rounded cursor-pointer"
                 />
             </div>
-            <div className="glass rounded-lg p-3 hover:shadow-md transition-shadow flex-1">
+            <div className="glass rounded-lg p-2 md:p-3 hover:shadow-md transition-shadow flex-1"
+                onClick={() => setEditingItemId(item.id)}>
                 <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-800 truncate">{item.name}</h4>
+                        <h4 className="font-medium text-gray-800 text-clip">{item.name}</h4>
                         <p className={`text-xs ${item.price < 0 ? 'text-green-600 font-medium' : 'text-gray-600'}`}>
                             {item.price < 0 ? (
                                 <>Payment: {formatCurrency(Math.abs(item.count * item.price))}</>
@@ -119,13 +120,13 @@ const EditableItem: React.FC<EditableItemProps> = ({
                         <span className={`font-semibold text-sm ${item.price < 0 ? 'text-green-600' : 'text-primary-700'}`}>
                             {item.price < 0 ? '-' : ''}{formatCurrency(Math.abs(item.count * item.price))}
                         </span>
-                        <Button
+                        {/* <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => setEditingItemId(item.id)}
                         >
                             <Edit2 className="w-4 h-4 text-gray-600" />
-                        </Button>
+                        </Button> */}
                         <Button
                             size="sm"
                             variant="ghost"
@@ -187,7 +188,7 @@ export const TagModal: React.FC<TagModalProps> = ({ vendor, tag, isOpen, onClose
         <Modal isOpen={isOpen} onClose={onClose} title={tag.name}>
             {/* Add Item */}
             {/* Add Item / Payment */}
-            <div className="mt-4 mb-6">
+            <div className="mt-4 mb-6 sticky top-0 z-50">
                 {showAddItem ? (
                     <div className="glass rounded-lg p-3">
                         <div className="flex flex-col gap-2">
@@ -278,7 +279,7 @@ export const TagModal: React.FC<TagModalProps> = ({ vendor, tag, isOpen, onClose
             </div>
 
             {/* Items List */}
-            <div className="space-y-2">
+            <div className="space-y-2 pb-42">
                 {tag.items.map((item) => (
                     <EditableItem
                         key={item.id}

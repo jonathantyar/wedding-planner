@@ -139,6 +139,56 @@ export const FloatingBudget: React.FC = () => {
                                     </button>
                                 </div>
                                 <BudgetChart currentPlan={currentPlan} groupBy={groupBy} chartType={chartType} />
+
+                                {/* Payments List */}
+                                {(() => {
+                                    const paymentItems: Array<{
+                                        id: string;
+                                        name: string;
+                                        amount: number;
+                                        groupName: string;
+                                    }> = [];
+
+                                    currentPlan.vendors.forEach(vendor => {
+                                        if (!vendor.selected) return;
+                                        vendor.tags.forEach(tag => {
+                                            if (!tag.selected) return;
+                                            tag.items.forEach(item => {
+                                                if (item.selected && item.price < 0) {
+                                                    paymentItems.push({
+                                                        id: item.id,
+                                                        name: item.name,
+                                                        amount: Math.abs(item.count * item.price),
+                                                        groupName: groupBy === 'vendor' ? vendor.name : tag.name
+                                                    });
+                                                }
+                                            });
+                                        });
+                                    });
+
+                                    if (paymentItems.length === 0) return null;
+
+                                    return (
+                                        <div className="mt-4 border-t border-gray-100 pt-3">
+                                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                                                Payments made ({groupBy === 'vendor' ? 'By Vendor' : 'By Category'})
+                                            </h4>
+                                            <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                                                {paymentItems.map(payment => (
+                                                    <div key={payment.id} className="flex justify-between text-sm items-center bg-green-50/50 p-2 rounded">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-gray-800 font-medium">{payment.name}</span>
+                                                            <span className="text-xs text-gray-500">{payment.groupName}</span>
+                                                        </div>
+                                                        <span className="font-semibold text-green-600">
+                                                            {formatCurrency(payment.amount)}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
                             <div className="border-t-2 border-gray-200 pt-3 mt-2 grid grid-cols-3 gap-2 text-center">

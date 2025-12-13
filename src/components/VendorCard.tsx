@@ -22,17 +22,27 @@ export const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
         }
     };
 
-    const vendorTotal = vendor.useSum
-        ? vendor.tags.reduce((sum, tag) => {
-            if (!tag.selected) return sum;
-            const tagTotal = tag.useSum
+    const { cost, paid } = vendor.useSum
+        ? vendor.tags.reduce((acc, tag) => {
+            if (!tag.selected) return acc;
+            const tagStats = tag.useSum
                 ? tag.items
                     .filter(item => item.selected)
-                    .reduce((itemSum, item) => itemSum + item.count * item.price, 0)
-                : tag.manualTotal;
-            return sum + tagTotal;
-        }, 0)
-        : vendor.manualTotal;
+                    .reduce((itemAcc, item) => {
+                        const total = item.count * item.price;
+                        if (total >= 0) {
+                            return { ...itemAcc, cost: itemAcc.cost + total };
+                        } else {
+                            return { ...itemAcc, paid: itemAcc.paid + Math.abs(total) };
+                        }
+                    }, { cost: 0, paid: 0 })
+                : { cost: tag.manualTotal, paid: 0 };
+            return {
+                cost: acc.cost + tagStats.cost,
+                paid: acc.paid + tagStats.paid
+            };
+        }, { cost: 0, paid: 0 })
+        : { cost: vendor.manualTotal, paid: 0 };
 
     return (
         <>
@@ -59,18 +69,23 @@ export const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
                             <p className="text-xs md:text-sm text-gray-600">{vendor.tags.length} categories</p>
                         </div>
 
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex flex-col items-end flex-shrink-0">
                             <span className="text-sm md:text-lg font-bold text-primary-700">
-                                {formatCurrency(vendorTotal)}
+                                {formatCurrency(cost)}
                             </span>
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleDelete}
-                            >
-                                <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-red-600" />
-                            </Button>
+                            {paid > 0 && (
+                                <span className="text-xs md:text-sm font-semibold text-green-600">
+                                    Paid: {formatCurrency(paid)}
+                                </span>
+                            )}
                         </div>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleDelete}
+                        >
+                            <Trash2 className="w-4 h-4 md:w-5 md:h-5 text-red-600" />
+                        </Button>
                     </div>
                 </Card>
             </div>
